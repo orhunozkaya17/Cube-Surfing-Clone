@@ -10,9 +10,18 @@ public static class Events
     public static event Action GameOver;
 
     public static event Action<GemsArg> GemCollect;
+    public static event Action<int> StackCollect;
 
+    public static event Action WinGame;
 
-
+    public static void CallWinGame()
+    {
+        WinGame?.Invoke();
+    }
+    public static void CallStackCollectEvent(int stack)
+    {
+        StackCollect?.Invoke(stack);
+    }
     public static void CallObstacleHitEvent(GameObject obstacle)
     {
         ObstacleHit?.Invoke(obstacle);

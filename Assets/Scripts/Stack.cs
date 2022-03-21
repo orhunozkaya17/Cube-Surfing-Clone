@@ -36,6 +36,7 @@ public class Stack : MonoBehaviour
             this.transform.SetParent(null);
             Events.CallObstacleHitEvent(this.gameObject);
         }
+    
     }
 
     private void OnTriggerEnter(Collider other)
@@ -44,6 +45,11 @@ public class Stack : MonoBehaviour
         {
             this.transform.SetParent(null);
             Events.CallObstacleHitEvent(this.gameObject);
+        }
+        if (other.CompareTag("Gem"))
+        {
+            Events.CallScoreChangedEvent(new GemsArg() { pos = transform.position, gem = other.gameObject });
+            other.gameObject.SetActive(false);
         }
     }
 }

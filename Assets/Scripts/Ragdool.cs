@@ -19,6 +19,7 @@ public class Ragdool : MonoBehaviour
     private void OnEnable()
     {
         Events.GameOver += Events_GameOver;
+        
     }
     private void OnDisable()
     {
@@ -26,7 +27,15 @@ public class Ragdool : MonoBehaviour
     }
     private void Events_GameOver()
     {
-        ActivateRagDoll();
+        if (GamaManager.Instance.gameState==GameState.winLine)
+        {
+
+        }
+        else
+        {
+            ActivateRagDoll();
+        }
+     
     }
 
     public void DeActivateRagDoll()

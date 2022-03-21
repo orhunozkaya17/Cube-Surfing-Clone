@@ -8,6 +8,7 @@ TagManager:
   - Obstacle
   - Water
   - Gem
+  - FinishGame
   layers:
   - Default
   - TransparentFX

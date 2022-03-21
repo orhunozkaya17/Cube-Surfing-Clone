@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,36 +13,45 @@ public class Player : MonoBehaviour
 
     [Header("Path")]
     [SerializeField] Transform PlayerFollow;
-    [SerializeField] Path path;
+    public Path currentpath;
     [SerializeField] float reachDistance = 0.1f;
     [SerializeField] float rotationSpeed = 10f;
+
+    private Animator anim;
     private int currentWayPointID = 0;
     private Vector3 direction;
     Vector3 lastpos;
     private float baseSpeedZ;
     private SwerveInput swerveInput;
     private bool gameOver = false;
+ 
     private float speedTime = 0f;
     Coroutine SpeedRoutine;
+
+    PlayerState playerState = PlayerState.Normal;
+    bool ilkupdate;
     void Start()
     {
-        lastpos = PlayerFollow.position; 
+        lastpos = PlayerFollow.position;
         baseSpeedZ = speedZ;
         swerveInput = GetComponent<SwerveInput>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     private void OnEnable()
     {
         Events.GameOver += Events_GameOver;
+     
     }
+
+   
+
     private void OnDisable()
     {
         Events.GameOver -= Events_GameOver;
+     
     }
-    private void Events_GameOver()
-    {
-        gameOver = true;
-    }
+   
 
     void Update()
     {
@@ -54,58 +64,60 @@ public class Player : MonoBehaviour
         swerveAmount = Mathf.Clamp(swerveAmount, -maxSwerveAmount, maxSwerveAmount);
         moveonpath();
         transform.rotation = PlayerFollow.rotation;
-        //transform.Translate(direction.normalized * Time.deltaTime * speedZ); 
-        if (PlayerFollow.position- lastpos  != Vector3.zero)
+
+        if (PlayerFollow.position - lastpos != Vector3.zero && ilkupdate==true)
         {
-            transform.position += PlayerFollow.position-lastpos;
+            transform.position += PlayerFollow.position - lastpos;
         }
+        ilkupdate = true;
         lastpos = PlayerFollow.position;
-        //distance between playerfollow   and player 
-
-
-        float distance = Vector3.Distance(PlayerFollow.position, transform.position + ((transform.right.normalized) * swerveAmount));
-
-        if (Vector3.Distance(PlayerFollow.position, transform.position + (transform.right.normalized) * swerveAmount) <= 3)
+        if (Vector3.Distance(new Vector3(PlayerFollow.transform.position.x,0f,PlayerFollow.transform.position.z), new Vector3(transform.position.x, 0f, transform.position.z)+(transform.right.normalized) * swerveAmount) <= 3 && playerState != PlayerState.Coner)
         {
             transform.Translate(swerveAmount, 0, 0);
 
         }
-
-
-
-
     }
 
 
-    public void SpeedUpdate(float speed, float time)
-    {
-        speedZ = speed;
-        speedTime = time;
-        if (SpeedRoutine != null)
-        {
-            StopCoroutine(SpeedRoutine);
-        }
-        SpeedRoutine = StartCoroutine(SpeedBaseDown());
-    }
-
-    IEnumerator SpeedBaseDown()
-    {
-
-
-        while (speedTime > 0)
-        {
-            speedTime -= Time.deltaTime;
-            yield return null;
-        }
-        speedZ = baseSpeedZ;
-    }
+   
     private void moveonpath()
     {
+        if (currentpath == null)
+        {
+            ilkupdate = false;
+            currentWayPointID = 0;
+            currentpath = PathManager.instance.GetPath();
 
+            if (currentpath == null)
+            {
+                if (GamaManager.Instance.gameState==GameState.winLine)
+                {
+                    anim.SetTrigger("Dance");
+                    gameOver = true;
+                  
+                }
+                return;
+            }
+
+            if (currentpath.isCorner)
+            {              
+                currentpath.pointchange(transform.position);
+                playerState = PlayerState.Coner;
+              
+            }
+            else
+            {
+                playerState = PlayerState.Normal;
+            }
+            currentpath.CreatePath();
+            PlayerFollow.transform.position = currentpath.GetPoint();
+            //transform.position = PlayerFollow.transform.position;
+
+        }
         //move
-        float distance = Vector3.Distance(path.bezierObjList[currentWayPointID], PlayerFollow.position);
-        direction = path.bezierObjList[currentWayPointID] - PlayerFollow.position;
-        PlayerFollow.position = Vector3.MoveTowards(PlayerFollow.position, path.bezierObjList[currentWayPointID], speedZ * Time.deltaTime);
+        float distance = Vector3.Distance(currentpath.bezierObjList[currentWayPointID], PlayerFollow.position);
+        direction = currentpath.bezierObjList[currentWayPointID] - PlayerFollow.position;
+        PlayerFollow.position = Vector3.MoveTowards(PlayerFollow.position, currentpath.bezierObjList[currentWayPointID], speedZ * Time.deltaTime);
         //rotation
 
         if (direction != Vector3.zero)
@@ -119,11 +131,43 @@ public class Player : MonoBehaviour
         {
             currentWayPointID++;
         }
-        if (currentWayPointID >= path.bezierObjList.Count)
+        if (currentWayPointID >= currentpath.bezierObjList.Count)
         {
-            gameOver = true;
+            currentpath = null;
 
         }
-        
+
     }
+    public void SpeedUpdate(float speed, float time)
+    {
+        speedZ = speed;
+        speedTime = time;
+        if (SpeedRoutine != null)
+        {
+            StopCoroutine(SpeedRoutine);
+        }
+        SpeedRoutine = StartCoroutine(SpeedBaseDown());
+    }
+
+    IEnumerator SpeedBaseDown()
+    {
+        while (speedTime > 0)
+        {
+            speedTime -= Time.deltaTime;
+            yield return null;
+        }
+        speedZ = baseSpeedZ;
+    }
+
+    private void Events_GameOver()
+    {
+        if (GamaManager.Instance.gameState == GameState.winLine)
+        {
+            anim.SetTrigger("Dance");
+            gameOver = true;
+        }
+        gameOver = true;
+
+    }
+
 }

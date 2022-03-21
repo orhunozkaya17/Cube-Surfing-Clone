@@ -11,7 +11,7 @@ public class StackController : MonoBehaviour
 
     List<Transform> stacks = new List<Transform>();
 
-
+  
     void Start()
     {
         foreach (Transform child in stackParent)
@@ -23,6 +23,16 @@ public class StackController : MonoBehaviour
     private void OnEnable()
     {
         Events.ObstacleHit += ObstacleHit;
+        Events.StackCollect += Events_StackCollect;
+    }
+    private void OnDisable()
+    {
+        Events.ObstacleHit -= ObstacleHit;
+        Events.StackCollect -= Events_StackCollect;
+    }
+    private void Events_StackCollect(int stackAdd)
+    {
+        AddStack(stackAdd);
     }
 
     private void ObstacleHit(GameObject obj)
@@ -34,10 +44,7 @@ public class StackController : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        Events.ObstacleHit -= ObstacleHit;
-    }
+   
     void AddStack(int stackCount)
     {
         for (int i = 0; i < stackCount; i++)
@@ -53,13 +60,14 @@ public class StackController : MonoBehaviour
     {
         if (other.tag == "Stack")
         {
-            AddStack(1);
+          
             other.gameObject.SetActive(false);
         }
-        if (other.CompareTag("Gem"))
+        if (other.CompareTag("FinishGame"))
         {
-            Events.CallScoreChangedEvent(new GemsArg() { pos = transform.position, gem=other.gameObject });
-            other.gameObject.SetActive(false);
+            Events.CallWinGame();
+           
         }
+   
     }
 }
