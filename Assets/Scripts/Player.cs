@@ -17,7 +17,6 @@ public class Player : MonoBehaviour
     [SerializeField] float reachDistance = 0.1f;
     [SerializeField] float rotationSpeed = 10f;
 
-    private Animator anim;
     private int currentWayPointID = 0;
     private Vector3 direction;
     Vector3 lastpos;
@@ -35,26 +34,32 @@ public class Player : MonoBehaviour
         lastpos = PlayerFollow.position;
         baseSpeedZ = speedZ;
         swerveInput = GetComponent<SwerveInput>();
-        anim = GetComponentInChildren<Animator>();
-    }
 
+    }
+    
     private void OnEnable()
     {
         Events.GameOver += Events_GameOver;
-     
+        Events.complateGame += Events_complateGame;
+
     }
 
-   
+  
 
     private void OnDisable()
     {
         Events.GameOver -= Events_GameOver;
-     
+        Events.complateGame -= Events_complateGame;
+
     }
    
 
     void Update()
     {
+        if (GamaManager.Instance.gameState==GameState.None)
+        {
+            return;
+        }
         if (gameOver == true)
         {
             return;
@@ -92,7 +97,7 @@ public class Player : MonoBehaviour
             {
                 if (GamaManager.Instance.gameState==GameState.winLine)
                 {
-                    anim.SetTrigger("Dance");
+                    Events.CallComplateGame();
                     gameOver = true;
                   
                 }
@@ -111,7 +116,7 @@ public class Player : MonoBehaviour
             }
             currentpath.CreatePath();
             PlayerFollow.transform.position = currentpath.GetPoint();
-            //transform.position = PlayerFollow.transform.position;
+           
 
         }
         //move
@@ -140,6 +145,7 @@ public class Player : MonoBehaviour
     }
     public void SpeedUpdate(float speed, float time)
     {
+        ParticalEffectController.Instance.SpeedEffect().Play();
         speedZ = speed;
         speedTime = time;
         if (SpeedRoutine != null)
@@ -157,17 +163,19 @@ public class Player : MonoBehaviour
             yield return null;
         }
         speedZ = baseSpeedZ;
+        ParticalEffectController.Instance.SpeedEffect().Stop();
     }
 
     private void Events_GameOver()
     {
-        if (GamaManager.Instance.gameState == GameState.winLine)
-        {
-            anim.SetTrigger("Dance");
-            gameOver = true;
-        }
+
         gameOver = true;
 
+    }
+
+    private void Events_complateGame()
+    {
+        gameOver = true;
     }
 
 }

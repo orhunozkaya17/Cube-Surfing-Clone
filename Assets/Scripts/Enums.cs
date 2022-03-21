@@ -4,6 +4,7 @@ public enum GameState
     Menu,
     Playing,
     winLine,
+    ComplateGame,
     GameOver
 }
 

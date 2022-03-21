@@ -13,7 +13,13 @@ public static class Events
     public static event Action<int> StackCollect;
 
     public static event Action WinGame;
+    public static event Action complateGame;
+    public static event Action GameStart;
 
+    public static void CallGameStart()
+    {
+        GameStart?.Invoke();
+    }
     public static void CallWinGame()
     {
         WinGame?.Invoke();
@@ -34,7 +40,10 @@ public static class Events
     {
         GemCollect?.Invoke(arg);
     }
-
+    public static void CallComplateGame()
+    {
+        complateGame?.Invoke();
+    }
 }
 public class GemsArg : EventArgs
 {

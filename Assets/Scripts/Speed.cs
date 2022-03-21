@@ -21,7 +21,7 @@ public class Speed : MonoBehaviour
         if (other.CompareTag("Player"))
             
         {
-           
+            SoundManager.instance.PlaySpeedSound(transform.position);
             other.GetComponent<Player>().SpeedUpdate(speed, time);
         }
     }

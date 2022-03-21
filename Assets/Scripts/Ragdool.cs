@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,23 +20,22 @@ public class Ragdool : MonoBehaviour
     private void OnEnable()
     {
         Events.GameOver += Events_GameOver;
-        
+        Events.complateGame += Events_CallComplateGame;
+
     }
+
+    private void Events_CallComplateGame()
+    {
+        animator.SetTrigger("Dance");
+    }
+
     private void OnDisable()
     {
         Events.GameOver -= Events_GameOver;
     }
     private void Events_GameOver()
     {
-        if (GamaManager.Instance.gameState==GameState.winLine)
-        {
-
-        }
-        else
-        {
-            ActivateRagDoll();
-        }
-     
+        ActivateRagDoll();
     }
 
     public void DeActivateRagDoll()

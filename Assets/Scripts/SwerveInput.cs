@@ -7,7 +7,7 @@ public class SwerveInput : MonoBehaviour
     private float _LastFrameFingerPostionX;
     private float _movefactor;
 
-
+    
     public float MoveFactor
     {
         get { return _movefactor; }
@@ -33,6 +33,13 @@ public class SwerveInput : MonoBehaviour
         else if (Input.GetMouseButtonUp(0))
         {
             _movefactor = 0f;
+        }
+        if (GamaManager.Instance.gameState==GameState.None)
+        {
+            if (_movefactor !=0)
+            {
+                Events.CallGameStart();
+            }
         }
     }
 }

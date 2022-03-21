@@ -35,6 +35,7 @@ public class Stack : MonoBehaviour
         {
             this.transform.SetParent(null);
             Events.CallObstacleHitEvent(this.gameObject);
+            SoundManager.instance.PlayObstacle(transform.position);
         }
     
     }
@@ -45,11 +46,13 @@ public class Stack : MonoBehaviour
         {
             this.transform.SetParent(null);
             Events.CallObstacleHitEvent(this.gameObject);
+            SoundManager.instance.PlayObstacle(transform.position);
         }
         if (other.CompareTag("Gem"))
         {
             Events.CallScoreChangedEvent(new GemsArg() { pos = transform.position, gem = other.gameObject });
             other.gameObject.SetActive(false);
+            SoundManager.instance.PlayGemSound(transform.position);
         }
     }
 }

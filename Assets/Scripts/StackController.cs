@@ -10,7 +10,7 @@ public class StackController : MonoBehaviour
     [SerializeField] Transform Player;
 
     List<Transform> stacks = new List<Transform>();
-
+    bool winGame = false;
   
     void Start()
     {
@@ -38,7 +38,11 @@ public class StackController : MonoBehaviour
     private void ObstacleHit(GameObject obj)
     {
         stacks.Remove(obj.transform);
-        if (stacks.Count == 0)
+        Destroy(obj,4f);
+        if (winGame && stacks.Count == 0)
+        {
+            Events.CallComplateGame();
+        }else if (stacks.Count == 0)
         {
             Events.CallGameOverEvent();
         }
@@ -53,18 +57,19 @@ public class StackController : MonoBehaviour
             stack.transform.localPosition = new Vector3(0, stacks[stacks.Count - 1].localPosition.y + 1f, 0);
             stacks.Add(stack.transform);
         }
-
+        SoundManager.instance.PlayStackCollect(transform.position);
         Player.localPosition = new Vector3(0, stacks[stacks.Count - 1].position.y + 1f, 0);
     }
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Stack")
         {
-          
+            ParticalEffectController.Instance.stackCollectEffect(other.transform.position);
             other.gameObject.SetActive(false);
         }
         if (other.CompareTag("FinishGame"))
         {
+            winGame = true;
             Events.CallWinGame();
            
         }
